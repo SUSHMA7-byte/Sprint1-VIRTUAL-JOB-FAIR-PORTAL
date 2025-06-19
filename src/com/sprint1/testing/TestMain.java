@@ -10,10 +10,14 @@ import com.sprint1.util.DBUtil;
 
 public class TestMain {
     private Scanner sc;
-    private Concurrency concurrency;
     private final int THREAD_COUNT = 10;
     private int JOB_ID = 1;
+    private List<Candidate> testCandidates; // ✅ Hold candidate list
+    private Concurrency concurrency;
 
+    public TestMain(Scanner sc) {
+        this.sc = sc;
+    }
 
     public void runFullTest() {
         deleteTestData();
@@ -23,6 +27,8 @@ public class TestMain {
 
     public void createTestCandidates() {
         System.out.println("Creating test candidates (multi-threaded)...");
+        testCandidates = CandidateTesting.generateTestingCandidates(THREAD_COUNT);
+        concurrency = new Concurrency(JOB_ID, THREAD_COUNT, testCandidates); // ✅ pass list
         concurrency.runCandidateCreationOnly();
     }
 
@@ -31,32 +37,28 @@ public class TestMain {
         int job_id = sc.nextInt();
         sc.nextLine();
         JOB_ID = job_id;
+        if (testCandidates == null || testCandidates.isEmpty()) {
+            System.out.println("No candidates available. Run candidate creation first.");
+            return;
+        }
+        this.concurrency = new Concurrency(JOB_ID, THREAD_COUNT, testCandidates);
         System.out.println("Creating test applications (multi-threaded)...");
         concurrency.runApplicationCreationOnly();
     }
 
     public void deleteTestData() {
         System.out.println("Deleting all test candidates and their applications...");
-
         String deleteSQL = "DELETE FROM Candidate WHERE name LIKE ?";
-
-        try (
-                Connection conn = DBUtil.getConnection();
-                PreparedStatement stmt = conn.prepareStatement(deleteSQL)
-        ) {
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(deleteSQL)) {
             stmt.setString(1, "%test_candidate%");
             int deleted = stmt.executeUpdate();
             System.out.println("Deleted " + deleted + " test candidates and their related information.");
-
         } catch (Exception e) {
             e.printStackTrace();
             System.err.println("Error while deleting test data.");
         }
-    }
-
-    public TestMain(Scanner sc) {
-        this.sc = sc;
-        this.concurrency = new Concurrency(JOB_ID, THREAD_COUNT);
+        testCandidates = null; // ✅ clear after deletion
     }
 
     public void testHandler() {
@@ -69,28 +71,16 @@ public class TestMain {
             System.out.println("4. Delete All Test Data from Database");
             System.out.println("5. Exit ...");
             choice = sc.nextInt();
-
             sc.nextLine();
 
             switch (choice) {
-                case 1:
-                    runFullTest();
-                    break;
-                case 2:
-                    createTestCandidates();
-                    break;
-                case 3:
-                    createTestApplications();
-                    break;
-                case 4:
-                    deleteTestData();
-                    break;
-                default:
-                    System.out.println("Invalid Choice ! Please Try Again...");
+                case 1 -> runFullTest();
+                case 2 -> createTestCandidates();
+                case 3 -> createTestApplications();
+                case 4 -> deleteTestData();
+                default -> System.out.println("Invalid Choice ! Please Try Again...");
             }
 
         } while (choice != 5);
     }
-
-
 }

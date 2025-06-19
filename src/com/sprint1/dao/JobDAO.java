@@ -19,8 +19,8 @@ public class JobDAO {
             ps.setString(2, job.getJobDescription());
             ps.setDouble(3, job.getSalaryPackage());
             ps.setInt(4, job.getTotalOpenings());
-            ps.setTimestamp(5, Timestamp.valueOf(job.getApplicationStartDate()));
-            ps.setTimestamp(6, Timestamp.valueOf(job.getApplicationEndDate()));
+            ps.setDate(5, Date.valueOf(job.getApplicationStartDate()));
+            ps.setDate(6, Date.valueOf(job.getApplicationEndDate()));
             ps.setString(7, job.getJobLocation());
             ps.setString(8, job.getJobType());
             ps.setInt(9, job.getCompanyId());
@@ -54,8 +54,8 @@ public class JobDAO {
                 job.setJobDescription(rs.getString("job_description"));
                 job.setSalaryPackage(rs.getDouble("salary_package"));
                 job.setTotalOpenings(rs.getInt("total_openings"));
-                job.setApplicationStartDate(rs.getTimestamp("application_start_date").toLocalDateTime());
-                job.setApplicationStartDate(rs.getTimestamp("application_end_date").toLocalDateTime());
+                job.setApplicationStartDate(rs.getDate("application_start_date").toLocalDate());
+                job.setApplicationEndDate(rs.getDate("application_end_date").toLocalDate());
                 job.setJobLocation(rs.getString("job_location"));
                 job.setJobType(rs.getString("job_type"));
                 job.setCompanyId(rs.getInt("company_id"));
@@ -67,6 +67,7 @@ public class JobDAO {
 
         return jobs;
     }
+
 
     public List<Job> getAllActiveJobs() {
         List<Job> jobs = new ArrayList<>();
@@ -84,8 +85,9 @@ public class JobDAO {
                 job.setJobDescription(rs.getString("job_description"));
                 job.setSalaryPackage(rs.getDouble("salary_package"));
                 job.setTotalOpenings(rs.getInt("total_openings"));
-                job.setApplicationStartDate(rs.getTimestamp("application_start_date").toLocalDateTime());
-                job.setApplicationEndDate(rs.getTimestamp("application_end_date").toLocalDateTime());
+                job.setApplicationStartDate(rs.getDate("application_start_date").toLocalDate());
+                job.setApplicationEndDate(rs.getDate("application_end_date").toLocalDate());
+
                 job.setJobLocation(rs.getString("job_location"));
                 job.setJobType(rs.getString("job_type"));
                 job.setCompanyId(rs.getInt("company_id"));
@@ -114,17 +116,33 @@ public class JobDAO {
                         rs.getString("job_description"),
                         rs.getDouble("salary_package"),
                         rs.getInt("total_openings"),
-                        rs.getTimestamp("application_start_date").toLocalDateTime(),
-                        rs.getTimestamp("application_end_date").toLocalDateTime(),
+                        rs.getDate("application_start_date").toLocalDate(),
+                        rs.getDate("application_end_date").toLocalDate(),
                         rs.getString("job_location"),
                         rs.getString("job_type")
                 );
                 job.setCompanyId(rs.getInt("company_id"));
                 return job;
             }
+
         } catch (Exception e) {
             e.printStackTrace();
         }
+
         return null;
     }
+
+    public boolean jobExists(int jobId) {
+        String sql = "SELECT COUNT(*) FROM Job WHERE job_id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setInt(1, jobId);
+            ResultSet rs = ps.executeQuery();
+            if (rs.next()) return rs.getInt(1) > 0;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 }

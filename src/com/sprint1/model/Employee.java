@@ -7,12 +7,35 @@ public class Employee {
     private String contactNumber;
     private String email;
 
-    public Employee(int employeeId, String fullName, String role, String contactNumber, String email) {
+    private int companyId;
+
+//    public Employee(int employeeId, String fullName, String role, String contactNumber, String email) {
+//    }
+
+    public int getCompanyId() {
+        return companyId;
+    }
+
+    public void setCompanyId(int companyId) {
+        this.companyId = companyId;
+    }
+
+    public Employee(int employeeId, String fullName, String role, String contactNumber, String email, int companyId) {
         this.employeeId = employeeId;
         this.fullName = fullName;
         this.role = role;
         this.contactNumber = contactNumber;
         this.email = email;
+        this.companyId=companyId;
+    }
+
+    public Employee( String fullName, String role, String contactNumber, String email,int companyId) {
+        //this.employeeId = employeeId;
+        this.fullName = fullName;
+        this.role = role;
+        this.contactNumber = contactNumber;
+        this.email = email;
+        this.companyId=companyId;
     }
 
     public int getEmployeeId() {
@@ -54,4 +77,16 @@ public class Employee {
     public void setEmail(String email) {
         this.email = email;
     }
+
+    @Override
+    public String toString() {
+        return "\n===== Employee Details =====" +
+                "\nID           : " + employeeId +
+                "\nName         : " + fullName +
+                "\nRole         : " + role +
+                "\nContact No.  : " + contactNumber +
+                "\nEmail        : " + email +
+                "\nCompany ID   : " + companyId;
+    }
+
 }

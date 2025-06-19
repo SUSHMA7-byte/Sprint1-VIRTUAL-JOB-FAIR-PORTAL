@@ -19,16 +19,24 @@ public class ApplicationTesting implements Runnable {
             JobDAO jobDAO = new JobDAO();
             ApplicationDAO applicationDAO = new ApplicationDAO();
             Job job = jobDAO.getJobById(jobId);
+
+            if (job == null) {
+                System.out.println("Job with ID " + jobId + " does not exist. Cannot apply.");
+                return;  // skip this thread
+            }
+
             try {
                 applicationDAO.applyForJob(candidateId, jobId, "Pending");
                 System.out.println("Application submitted for job: " + job.getJobTitle());
             } catch (Exception e) {
                 e.printStackTrace();
             }
+
             System.out.println("Application Created for Candidate ID: " + candidateId + " for Job ID: " + jobId);
         } catch (Exception e) {
             System.err.println("Error creating application for Candidate ID: " + candidateId);
             e.printStackTrace();
         }
     }
+
 }

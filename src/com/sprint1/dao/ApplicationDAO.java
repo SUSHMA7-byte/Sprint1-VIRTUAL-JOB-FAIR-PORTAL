@@ -4,7 +4,6 @@ import com.sprint1.model.Application;
 import com.sprint1.model.Candidate;
 import com.sprint1.model.Job;
 import com.sprint1.util.DBUtil;
-import com.sprint1.exception.applications.*;
 
 import java.sql.*;
 import java.sql.Date;
@@ -13,16 +12,21 @@ import java.util.*;
 
 public class ApplicationDAO {
 
-    // Apply a candidate to a job
-    public int applyForJob(int candidateId, int jobId, String status) throws InvalidApplicationStatusException, DuplicateApplicationException {
-        // Enforce status enum
+    // Apply a candidate to a job with validation (non-duplicate and valid status)
+    public int applyForJob(int candidateId, int jobId, String status) {
         if (!List.of("Pending", "Reviewed", "Selected", "Rejected").contains(status)) {
-            throw new InvalidApplicationStatusException(status);
+            System.out.println("Invalid application status: " + status);
+            return -1;
         }
 
-        // Enforce uniqueness
+        if (!new JobDAO().jobExists(jobId)) {
+            System.out.println("Error: Job ID " + jobId + " does not exist. Cannot apply.");
+            return -1;
+        }
+
         if (checkApplicationExists(candidateId, jobId)) {
-            throw new DuplicateApplicationException();
+            System.out.println("Duplicate application: Candidate ID " + candidateId + " has already applied for Job ID " + jobId);
+            return -1;
         }
 
         String sql = "INSERT INTO Application (candidate_id, job_id, application_status, application_date) VALUES (?, ?, ?, ?)";
@@ -51,32 +55,8 @@ public class ApplicationDAO {
         return generatedId;
     }
 
-    // Retrieve all applications for a given jobId
-    public List<Application> getApplicationsForJob(int jobId) {
-        List<Application> list = new ArrayList<>();
-        String sql = "SELECT application_id, application_status, application_date FROM Application WHERE job_id = ?";
 
-        try (Connection conn = DBUtil.getConnection();
-             PreparedStatement ps = conn.prepareStatement(sql)) {
-
-            ps.setInt(1, jobId);
-            ResultSet rs = ps.executeQuery();
-
-            while (rs.next()) {
-                Application app = new Application(
-                        rs.getInt("application_id"),
-                        rs.getString("application_status"),
-                        rs.getDate("application_date").toLocalDate().atStartOfDay());
-                list.add(app);
-            }
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
-        return list;
-    }
-
+    // Check if the candidate has already applied for the job
     public boolean checkApplicationExists(int candidateId, int jobId) {
         String sql = "SELECT COUNT(*) FROM Application WHERE candidate_id = ? AND job_id = ?";
 
@@ -96,6 +76,55 @@ public class ApplicationDAO {
         return false;
     }
 
+    // Get all applications for a specific job
+    public List<Application> getApplicationsForJob(int jobId) {
+        List<Application> list = new ArrayList<>();
+        String sql = "SELECT application_id, application_status, application_date FROM Application WHERE job_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, jobId);
+            ResultSet rs = ps.executeQuery();
+
+            while (rs.next()) {
+                Application app = new Application(
+                        rs.getInt("application_id"),
+                        rs.getString("application_status"),
+                        rs.getDate("application_date").toLocalDate().atStartOfDay()
+                );
+                list.add(app);
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return list;
+    }
+
+    // Get application ID based on candidate and job
+    public int getApplicationId(int candidateId, int jobId) {
+        String sql = "SELECT application_id FROM Application WHERE candidate_id = ? AND job_id = ?";
+
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+
+            ps.setInt(1, candidateId);
+            ps.setInt(2, jobId);
+            ResultSet rs = ps.executeQuery();
+
+            if (rs.next()) {
+                return rs.getInt("application_id");
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return 0;
+    }
+
+    // Get all jobs applied by a candidate
     public List<Job> getJobsAppliedByCandidate(int candidateId) {
         List<Job> jobs = new ArrayList<>();
         String sql = "SELECT j.* FROM Job j JOIN Application a ON j.job_id = a.job_id WHERE a.candidate_id = ?";
@@ -113,10 +142,11 @@ public class ApplicationDAO {
                         rs.getString("job_description"),
                         rs.getDouble("salary_package"),
                         rs.getInt("total_openings"),
-                        rs.getDate("application_start_date").toLocalDate().atStartOfDay(),
-                        rs.getDate("application_end_date").toLocalDate().atStartOfDay(),
+                        rs.getDate("application_start_date").toLocalDate(),
+                        rs.getDate("application_end_date").toLocalDate(),
                         rs.getString("job_location"),
-                        rs.getString("job_type"));
+                        rs.getString("job_type")
+                );
                 job.setCompanyId(rs.getInt("company_id"));
                 jobs.add(job);
             }
@@ -127,6 +157,7 @@ public class ApplicationDAO {
         return jobs;
     }
 
+    // Get all applications grouped by job for a company
     public Map<Job, List<Candidate>> getApplicationsByCompany(int companyId) {
         Map<Job, List<Candidate>> applicationsMap = new HashMap<>();
 
@@ -148,10 +179,11 @@ public class ApplicationDAO {
                         rs.getString("job_description"),
                         rs.getDouble("salary_package"),
                         rs.getInt("total_openings"),
-                        rs.getDate("application_start_date").toLocalDate().atStartOfDay(),
-                        rs.getDate("application_end_date").toLocalDate().atStartOfDay(),
+                        rs.getDate("application_start_date").toLocalDate(),
+                        rs.getDate("application_end_date").toLocalDate(),
                         rs.getString("job_location"),
-                        rs.getString("job_type"));
+                        rs.getString("job_type")
+                );
                 job.setCompanyId(rs.getInt("company_id"));
 
                 Candidate candidate = new Candidate();
@@ -173,6 +205,7 @@ public class ApplicationDAO {
         return applicationsMap;
     }
 
+    // Get list of applicants for a specific job
     public List<Candidate> getApplicantsForJob(int jobId) {
         List<Candidate> applicants = new ArrayList<>();
         String sql = "SELECT c.* FROM Candidate c " +
@@ -205,9 +238,8 @@ public class ApplicationDAO {
         return applicants;
     }
 
-
+    // For testing: forcibly apply regardless of status or duplication
     public int testApplyForJob(int candidateId, int jobId, String status) {
-
         String sql = "INSERT INTO Application (candidate_id, job_id, application_status, application_date) VALUES (?, ?, ?, ?)";
         int generatedId = -1;
 

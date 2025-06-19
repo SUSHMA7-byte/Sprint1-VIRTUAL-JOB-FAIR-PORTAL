@@ -98,7 +98,6 @@ public class CandidateServiceImpl {
         }
 
         for (Interview interview : interviews) {
-            //System.out.println("Interview Type: " + interview.getClass().getSimpleName().replace("Service", ""));
             System.out.println("Interview Type: " + interview.getInterviewType());
             System.out.println("Scheduled on: " + interview.getInterviewDatetime());
 

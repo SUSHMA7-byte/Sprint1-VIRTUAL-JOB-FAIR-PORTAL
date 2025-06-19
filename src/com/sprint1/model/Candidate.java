@@ -20,7 +20,7 @@ public class Candidate {
     }
 
     public Candidate( String fullName, String email, String phoneNumber, String resumeLink, String college, String country) {
-        // this.candidateId = candidateId;
+       // this.candidateId = candidateId;
         this.fullName = fullName;
         this.email = email;
         this.phoneNumber = phoneNumber;

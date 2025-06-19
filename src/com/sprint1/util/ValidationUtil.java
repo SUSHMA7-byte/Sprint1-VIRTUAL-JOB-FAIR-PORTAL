@@ -31,5 +31,36 @@ public class ValidationUtil {
         return field;
     }
 }
-
+//package com.sprint1.util;
+//
+//        import com.sprint1.exception.EmptyFieldException;
+//        import com.sprint1.exception.InvalidEmailException;
+//        import com.sprint1.exception.InvalidMobileNumberException;
+//
+//public class ValidationUtil {
+//
+//    public static void validateName(String name) throws EmptyFieldException {
+//        if (name == null || name.trim().isEmpty()) {
+//            throw new EmptyFieldException("Name cannot be empty");
+//        }
+//    }
+//
+//    public static void validateEmail(String email) throws InvalidEmailException {
+//        if (email == null || !email.matches("^(.+)@(.+)$")) {
+//            throw new InvalidEmailException("Invalid email format");
+//        }
+//    }
+//
+//    public static void validatePhone(String phone) throws InvalidMobileNumberException {
+//        if (phone == null || !phone.matches("^[1-9][0-9]{9}$")) {
+//            throw new InvalidMobileNumberException("Phone must be 10 digits and not start with 0");
+//        }
+//    }
+//
+//    public static void validatePassword(String password) throws EmptyFieldException {
+//        if (password == null || password.trim().isEmpty()) {
+//            throw new EmptyFieldException("Password cannot be empty");
+//        }
+//    }
+//}
 

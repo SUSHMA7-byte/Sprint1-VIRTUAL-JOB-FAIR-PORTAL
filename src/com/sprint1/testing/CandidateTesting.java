@@ -27,11 +27,12 @@ public class CandidateTesting implements Runnable {
 
     public static List<Candidate> generateTestingCandidates(int count) {
         List<Candidate> candidates = new ArrayList<>();
+        long timestamp = System.currentTimeMillis(); // ensures uniqueness
         for (int i = 0; i < count; i++) {
             Candidate c = new Candidate(
                     "test_candidate_" + i,
-                    "test_candidate_" + i + "@mail.com",
-                    "9999999999",
+                    "test_candidate_" + i + "_" + timestamp + "@mail.com",  // ✅ unique email
+                    "999999999" + i,
                     "Dummy Resume",
                     "Test College",
                     "India"

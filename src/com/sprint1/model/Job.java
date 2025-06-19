@@ -1,5 +1,6 @@
 package com.sprint1.model;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
@@ -9,8 +10,8 @@ public class Job {
     private String jobDescription;
     private double salaryPackage;
     private int totalOpenings;
-    private LocalDateTime applicationStartDate;
-    private LocalDateTime applicationEndDate;
+    private LocalDate applicationStartDate;
+    private LocalDate applicationEndDate;
     private String jobLocation;
     private String jobType;
     private int companyId;
@@ -18,7 +19,7 @@ public class Job {
     public Job() {}
 
     public Job(int jobId, String jobTitle, String jobDescription, double salaryPackage, int totalOpenings,
-               LocalDateTime applicationStartDate, LocalDateTime applicationEndDate,
+               LocalDate applicationStartDate, LocalDate applicationEndDate,
                String jobLocation, String jobType) {
         this.jobId = jobId;
         this.jobTitle = jobTitle;
@@ -73,19 +74,19 @@ public class Job {
         this.totalOpenings = totalOpenings;
     }
 
-    public LocalDateTime getApplicationStartDate() {
+    public LocalDate getApplicationStartDate() {
         return applicationStartDate;
     }
 
-    public void setApplicationStartDate(LocalDateTime applicationStartDate) {
+    public void setApplicationStartDate(LocalDate applicationStartDate) {
         this.applicationStartDate = applicationStartDate;
     }
 
-    public LocalDateTime getApplicationEndDate() {
+    public LocalDate getApplicationEndDate() {
         return applicationEndDate;
     }
 
-    public void setApplicationEndDate(LocalDateTime applicationEndDate) {
+    public void setApplicationEndDate(LocalDate applicationEndDate) {
         this.applicationEndDate = applicationEndDate;
     }
 
@@ -117,10 +118,10 @@ public class Job {
 
     @Override
     public String toString() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
-
-        String startDateStr = (applicationStartDate != null) ? applicationStartDate.format(formatter) : "N/A";
-        String endDateStr = (applicationEndDate != null) ? applicationEndDate.format(formatter) : "N/A";
+//        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd-MM-yyyy HH:mm");
+//
+//        String startDateStr = (applicationStartDate != null) ? applicationStartDate.format(formatter) : "N/A";
+//        String endDateStr = (applicationEndDate != null) ? applicationEndDate.format(formatter) : "N/A";
 
         return "Job Details:\n" +
                 "Job ID            : " + jobId + "\n" +
@@ -128,8 +129,8 @@ public class Job {
                 "Description       : " + jobDescription + "\n" +
                 "Salary Package    : ₹" + salaryPackage + "\n" +
                 "Total Openings    : " + totalOpenings + "\n" +
-                "Start Date        : " + startDateStr + "\n" +
-                "End Date          : " + endDateStr + "\n" +
+                "Start Date        : " + applicationStartDate + "\n" +
+                "End Date          : " + applicationEndDate + "\n" +
                 "Location          : " + jobLocation + "\n" +
                 "Job Type          : " + jobType + "\n" +
                 "Company ID        : " + companyId + "\n";

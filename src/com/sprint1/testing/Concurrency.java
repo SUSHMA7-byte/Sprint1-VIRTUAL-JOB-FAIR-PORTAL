@@ -9,16 +9,16 @@ import java.util.concurrent.Executors;
 public class Concurrency {
     private final int jobId;
     private final int threadCount;
-    private List<Candidate> candidates;
+    private final List<Candidate> candidates;
 
-    public Concurrency(int jobId, int threadCount) {
+    //  accept candidate list from TestMain
+    public Concurrency(int jobId, int threadCount, List<Candidate> candidates) {
         this.jobId = jobId;
         this.threadCount = threadCount;
+        this.candidates = candidates;
     }
 
     public void runCandidateCreationOnly() {
-        candidates = CandidateTesting.generateTestingCandidates(threadCount);
-
         ExecutorService candidateExecutor = Executors.newFixedThreadPool(threadCount);
         for (Candidate candidate : candidates) {
             candidateExecutor.execute(new CandidateTesting(candidate));
@@ -26,7 +26,6 @@ public class Concurrency {
         candidateExecutor.shutdown();
         while (!candidateExecutor.isTerminated()) {
         }
-
         System.out.println("All candidates created.");
     }
 
@@ -44,7 +43,6 @@ public class Concurrency {
         appExecutor.shutdown();
         while (!appExecutor.isTerminated()) {
         }
-
         System.out.println("All applications submitted.");
     }
 }

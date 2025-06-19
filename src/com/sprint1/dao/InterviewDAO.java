@@ -49,20 +49,21 @@ public class InterviewDAO {
     }
 
     public void scheduleInterview(Interview interview) {
-        String sql = "INSERT INTO Interview (candidate_id, job_id, company_id, interview_datetime, feedback, result_status, interview_type) " +
-                "VALUES (?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO Interview (application_id, job_id, company_id, recruiter_id, interview_datetime, result_status, candidate_id, interview_type) " +
+                "VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+
 
         try (Connection conn = DBUtil.getConnection();
              PreparedStatement ps = conn.prepareStatement(sql, Statement.RETURN_GENERATED_KEYS)) {
 
-            ps.setInt(1, interview.getCandidateId());
+            ps.setInt(1, interview.getApplicationId());
             ps.setInt(2, interview.getJobId());
-            ps.setString(3, interview.getCompanyId());
-            ps.setTimestamp(4, Timestamp.valueOf(interview.getInterviewDatetime()));
+            ps.setInt(3, interview.getCompanyId());
+            ps.setInt(4, interview.getRecruiterId());
+            ps.setTimestamp(5, Timestamp.valueOf(interview.getInterviewDatetime()));
             ps.setString(6, interview.getResultStatus());
-
-            String type = (interview instanceof HRInterviewService) ? "HR" : "Technical";
-            ps.setString(7, type);
+            ps.setInt(7, interview.getCandidateId());
+            ps.setString(8, interview.getInterviewType());
 
             ps.executeUpdate();
 
@@ -102,7 +103,7 @@ public class InterviewDAO {
                 interview.setInterviewId(rs.getInt("interview_id"));
                 interview.setCandidateId(rs.getInt("candidate_id"));
                 interview.setJobId(rs.getInt("job_id"));
-                interview.setCompanyId(rs.getString("company_id"));
+                interview.setCompanyId(rs.getInt("company_id"));
                 interview.setInterviewDatetime(rs.getTimestamp("interview_datetime").toLocalDateTime());
                 interview.setResultStatus(rs.getString("result_status"));
 
@@ -114,4 +115,40 @@ public class InterviewDAO {
         }
         return interviews;
     }
+
+
+
+    public Interview getInterviewByCandidateAndJob(int candidateId, int jobId) {
+        String query = "SELECT i.* FROM Interview i " +
+                "JOIN Application a ON i.application_id = a.application_id " +
+                "WHERE a.candidate_id = ? AND i.job_id = ?";
+        try (Connection conn = DBUtil.getConnection();
+             PreparedStatement stmt = conn.prepareStatement(query)) {
+
+            stmt.setInt(1, candidateId);
+            stmt.setInt(2, jobId);
+
+            ResultSet rs = stmt.executeQuery();
+            if (rs.next()) {
+                Interview interview = new Interview() {
+                    @Override
+                    public void conductInterview() {
+
+                    }
+                };
+                interview.setInterviewId(rs.getInt("interview_id"));
+                interview.setCandidateId(candidateId);
+                interview.setJobId(jobId);
+                interview.setApplicationId(rs.getInt("application_id"));
+                interview.setInterviewDatetime(rs.getTimestamp("interview_datetime").toLocalDateTime());
+                interview.setResultStatus(rs.getString("result_status"));
+                return interview;
+            }
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
 }
