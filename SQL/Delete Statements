@@ -1,0 +1,15 @@
+->Delete a Candidate
+
+    DELETE FROM Candidate WHERE candidate_id = 201;
+
+->Delete a Job
+
+    DELETE FROM Job WHERE job_id = 301;
+
+->Delete a  Application
+
+    DELETE FROM Application WHERE application_id = 401;
+
+
+
+

@@ -1,0 +1,72 @@
+-- Table: Company
+CREATE TABLE Company (
+    company_id INT PRIMARY KEY AUTO_INCREMENT,
+    company_name VARCHAR(100) NOT NULL,
+    industry_type VARCHAR(50),
+    contact_email VARCHAR(100) UNIQUE NOT NULL,
+    contact_phone VARCHAR(15),
+    office_address TEXT
+);
+
+-- Table: Candidate
+CREATE TABLE Candidate (
+    candidate_id INT PRIMARY KEY AUTO_INCREMENT,
+    name VARCHAR(100) NOT NULL,
+    email VARCHAR(100) UNIQUE NOT NULL,
+    phone VARCHAR(15),
+    resume_link VARCHAR(255),
+    college_name VARCHAR(100),
+    address TEXT
+);
+
+-- Table: Job
+CREATE TABLE Job (
+    job_id INT PRIMARY KEY AUTO_INCREMENT,
+    company_id INT NOT NULL,
+    job_title VARCHAR(100) NOT NULL,
+    job_description TEXT,
+    job_location VARCHAR(100) NOT NULL,
+    job_type VARCHAR(20) CHECK (job_type IN ('Remote', 'Hybrid', 'On-site')) NOT NULL,
+    salary_package DECIMAL(10,2) CHECK (salary_package >= 0),
+    total_openings INT CHECK (total_openings > 0),
+    application_start_date DATE NOT NULL,
+    application_end_date DATE NOT NULL CHECK (application_end_date >= application_start_date),
+    FOREIGN KEY (company_id) REFERENCES Company(company_id) ON DELETE CASCADE
+);
+
+-- Table: Application
+CREATE TABLE Application (
+    application_id INT PRIMARY KEY AUTO_INCREMENT,
+    candidate_id INT,
+    job_id INT,
+    application_status VARCHAR(20) DEFAULT 'Pending' CHECK (application_status IN ('Pending', 'Reviewed', 'Selected', 'Rejected')),
+    application_date DATE DEFAULT CURRENT_DATE,
+    FOREIGN KEY (candidate_id) REFERENCES Candidate(candidate_id) ON DELETE CASCADE,
+    FOREIGN KEY (job_id) REFERENCES Job(job_id) ON DELETE CASCADE
+);
+
+-- Table: Employee
+CREATE TABLE Employee (
+    employee_id INT PRIMARY KEY AUTO_INCREMENT,
+    full_name VARCHAR(100) NOT NULL,
+    role VARCHAR(50),
+    contact_number VARCHAR(15),
+    email VARCHAR(100) UNIQUE NOT NULL,
+    company_id INT,
+    FOREIGN KEY (company_id) REFERENCES Company(company_id) ON DELETE CASCADE
+);
+
+-- Table: Interview
+CREATE TABLE Interview (
+    interview_id INT PRIMARY KEY AUTO_INCREMENT,
+    application_id INT,
+    job_id INT,
+    company_id INT
+    recruiter_id INT,
+    interview_datetime TIMESTAMP,
+    result_status VARCHAR(20) DEFAULT 'Not Scheduled' CHECK (result_status IN ('Scheduled', 'Selected', 'Rejected', 'Not Scheduled')),
+    FOREIGN KEY (application_id) REFERENCES Application(application_id) ON DELETE CASCADE,
+    FOREIGN KEY (recruiter_id) REFERENCES Employee(employee_id) ON DELETE CASCADE,
+    FOREIGN KEY (company_id) REFERENCES Company(company_id),
+    FOREIGN KEY (job_id) REFERENCES Job(job_id)
+);

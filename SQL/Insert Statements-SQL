@@ -1,0 +1,56 @@
+-- Insert Company
+INSERT INTO Company (company_name, industry_type, contact_email, contact_phone, office_address)
+VALUES ('Cognizant', 'IT Services', 'contact@cognizant.com', '9876543210', 'Hyderabad, Telangana');
+
+-- Capture company_id
+SET @companyId = LAST_INSERT_ID();
+
+-- Insert Candidate
+INSERT INTO Candidate (name, email, phone, resume_link, college_name, address)
+VALUES ('Reethika Venturi', 'reethika@gmail.com', '9876543100', 'http://resume.com/reethika', 'KL University', 'Vijayawada, Andhra Pradesh');
+
+-- Capture candidate_id
+SET @candidateId = LAST_INSERT_ID();
+
+-- Insert Job
+INSERT INTO Job (company_id, job_title, job_description, job_location, job_type, salary_package, total_openings, application_start_date, application_end_date)
+VALUES (@companyId, 'Software Engineer', 'Responsible for backend development using Java and Spring Boot.', 'Hyderabad', 'Hybrid', 6.50, 5, '2025-06-10', '2025-06-25');
+
+-- Capture job_id
+SET @jobId = LAST_INSERT_ID();
+
+-- Insert Application (defaults: status = 'Pending', date = CURRENT_DATE)
+INSERT INTO Application (candidate_id, job_id)
+VALUES (@candidateId, @jobId);
+
+-- Capture application_id
+SET @appId = LAST_INSERT_ID();
+
+-- Update Application Status
+UPDATE Application
+SET application_status = 'Selected'
+WHERE application_id = @appId;
+
+-- Insert Employee
+INSERT INTO Employee (full_name, role, contact_number, email, company_id)
+VALUES ('Preeti Singh', 'HR', '9988776655', 'singhpreety217@gmail.com', @companyId);
+
+-- Capture employee_id
+SET @empId = LAST_INSERT_ID();
+
+-- Insert Interview (defaults: result_status = 'Not Scheduled')
+INSERT INTO Interview (application_id, recruiter_id, interview_datetime)
+VALUES (@appId, @empId, '2025-06-20 10:30:00');
+
+-- Capture interview_id
+SET @intId = LAST_INSERT_ID();
+
+-- Update Interview Status (Scheduled)
+UPDATE Interview
+SET result_status = 'Scheduled'
+WHERE interview_id = @intId;
+
+-- Later, update to Selected
+UPDATE Interview
+SET result_status = 'Selected'
+WHERE interview_id = @intId;
